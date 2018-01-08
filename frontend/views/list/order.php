@@ -39,7 +39,7 @@
 
 <!-- 主体部分 start -->
 <div class="fillin w990 bc mt15">
-    <form  action=""  method="post">
+    <form  action="<?=\yii\helpers\Url::to(['list/order'])?>"  method="post">
     <div class="fillin_hd">
         <h2>填写并核对订单信息</h2>
     </div>
