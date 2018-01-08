@@ -366,14 +366,10 @@ public function actionChange(){
 
 
             }
-        }
-
-
             //GET方式进来完成显示提交订单页面的功能
             return $this->render('order', ['address' => $address, 'pays' => $pays, 'deliveries' => $deliveries, 'carts' => $carts, 'total' => $total, 'count' => $count]);
-
-
         }
+    }
 
         /**
          * 完成订单成功页面的功能
