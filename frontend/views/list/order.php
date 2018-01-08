@@ -214,7 +214,7 @@
           var amount=money-(-totalMoney);
           $(".goodsAmount").html(amount);
       }
-    })
+    });
     $("#first").click();
 </script>
 </body>
