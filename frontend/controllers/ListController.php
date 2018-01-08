@@ -285,7 +285,6 @@ public function actionChange(){
             //POST方式进来保存订单的完成功能
             $request = new Request();
             if ($request->isPost) {
-                echo"jiesu";die;
                 $order = new Order();
                 $order->load($request->post(), '');
                 //在保存订单前开启事务
@@ -355,6 +354,7 @@ public function actionChange(){
                         Cart::deleteAll(['member_id' => $member_id]);
                         //提交事务
                         $transaction->commit();
+                        echo '1';die;
                         return $this->redirect(['list/order-success']);
                     }
                 } catch (Exception $e) {
