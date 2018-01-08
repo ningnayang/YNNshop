@@ -285,6 +285,7 @@ public function actionChange(){
             //POST方式进来保存订单的完成功能
             $request = new Request();
             if ($request->isPost) {
+                echo"jiesu";die;
                 $order = new Order();
                 $order->load($request->post(), '');
                 //在保存订单前开启事务
