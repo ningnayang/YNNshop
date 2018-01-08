@@ -349,7 +349,7 @@ public function actionChange(){
                         }
                         //处理订单总结额 商品总金额加运费
                         $order->total += $order->delivery_price;
-                        $order->save(false);
+                        $order->save();
                         //操作成功后清除用户的购物车数据
                         Cart::deleteAll(['member_id' => $member_id]);
                         //提交事务
@@ -362,7 +362,6 @@ public function actionChange(){
                     //跳转至购物车页面
                     return $this->redirect(['list/cart']);
                 }
-
 
             }
             //GET方式进来完成显示提交订单页面的功能
