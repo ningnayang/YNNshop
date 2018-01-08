@@ -50,8 +50,8 @@
             <h3>收货人信息</h3>
             <div class="address_info">
                 <p>
-                    <?php foreach($address as $add):?>
-                    <input type="radio" value="<?=$add->id?>" <?=$add->default==1?'checked':''?> name="address_id"/><?=Yii::$app->user->identity->username?>  <?=$add->telephone?>  <?=explode(',',$add->address)[0]?> <?=explode(',',$add->address)[1]?> <?=explode(',',$add->address)[2]?> </p>
+                    <?php foreach($address as $key=>$add):?>
+                    <input type="radio" value="<?=$add->id?>" <?=$key?'':'checked'?> name="address_id"/><?=Yii::$app->user->identity->username?>  <?=$add->telephone?>  <?=explode(',',$add->address)[0]?> <?=explode(',',$add->address)[1]?> <?=explode(',',$add->address)[2]?> </p>
                     <?php endforeach?>
             </div>
 
