@@ -354,7 +354,6 @@ public function actionChange(){
                         Cart::deleteAll(['member_id' => $member_id]);
                         //提交事务
                         $transaction->commit();
-                        echo '1';die;
                         return $this->redirect(['list/order-success']);
                     }
                 } catch (Exception $e) {
