@@ -18,13 +18,16 @@ use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\Cookie;
 use yii\web\Request;
+use common\models\SphinxClient;
 
 class ListController extends Controller{
     public $enableCsrfValidation=false;
     /**
      * 显示商品分类下的商品
      */
-    public function actionIndex($id){
+    public function actionIndex(){
+        $keywords=\Yii::$app->request->get('keywords');
+        $id=\Yii::$app->request->get('id');
         //找到该条数据
         $goods=GoodsCategory::findOne(['id'=>$id]);
         if($goods->depth==2){
@@ -45,6 +48,35 @@ class ListController extends Controller{
 
         return $this->render('index',['goodsList'=>$goodsList,'pager'=>$pager]);
     }
+    /**
+     * 完成商品 sphinx 分词搜索功能
+     */
+    public function actionSearch($keywords){
+        $cl = new SphinxClient();
+        $cl->SetServer ( '127.0.0.1', 9312);
+        $cl->SetConnectTimeout ( 10 );
+        $cl->SetArrayResult ( true );
+        $cl->SetMatchMode ( SPH_MATCH_EXTENDED2);
+        $cl->SetLimits(0, 1000);
+        //$info = '索尼电视';//关键字
+        $res = $cl->Query($keywords, 'mysql');//shopstore_search
+        $ids=[];
+        if(isset($res['matches'])){
+            foreach($res['matches'] as $match ){
+                $ids[]=$match['id'];
+            }
+        }
+        $query=Goods::find()->where(['in','id',$ids]);
+        $pager=new Pagination([
+            'totalCount'=>$query->count(),//总记录数
+            'defaultPageSize'=>3
+        ]);
+        $goodsList=$query->limit($pager->limit)->offset($pager->offset)->all();
+
+        return $this->render('index',['goodsList'=>$goodsList,'pager'=>$pager]);
+
+    }
+
 
     /**
      * 显示商品详情
@@ -408,6 +440,57 @@ public function actionChange(){
             $order->delete();
             //找到订单下的商品数据 删除
             OrderGoods::deleteAll(['order_id'=>$id]);
+
+        }
+        /**
+         * 情况：高并发情况下如果使用原来的库存处理方式，可能会出现用户同时下订单，同时判断库存的情况，
+         *       但是sql扣减库存有先后顺序，所以会出现超卖问题
+         * 问题：大并发情况下结局商品超卖问题?
+         * 注意：1：大并发 既然是大并发最好使用redis来处理
+         *       2：热门商品 如秒杀
+         * 以上两种情况都可以使用redis来解决商品超卖问题
+         */
+        public function actionOverflow(){
+                $goods_id=8;//商品id,假数据，到时候根据实际情况处理
+                $stock=20;//商品库存，写的假数据,到时候根据实际情况处理
+            //>>1.将商品库存保存在redis中
+                $redis=new \Redis();
+                $redis->set('stock_'.$goods_id,$stock);//注意写操作时要更新redis中的库存
+            //>>2.保存订单
+                //开启事务
+                $transaction=\Yii::$app->db->beginTransaction();
+                try{
+                //保存订单
+                $order=new Order();
+                $order->save();
+                $amount=6;//订单中商品数量 假数据 到时候根据实际情况处理
+                //遍历购物车，保存订单中的商品信息
+                foreach($carts as $cart){
+                    //先扣减库存再判断
+                    $result=$redis->decrBy('stock_'.$goods_id,$amount);
+                    //保存商品扣减的库存，以便后面做事务回滚时使用
+                    $redis->hSet('reduce_'.$order_id,$goods_id,$amount);//等同于$reduce_$order_id[$goods_id]=$amount
+                    if($result<0){
+                        //库存不足 抛出异常
+                        throw new Exception("库存不足！");
+                    }else{
+                        //库存足够 保存商品信息
+                        //扣减数据库商品库存
+                        //清空购物车
+                    }
+
+                }
+
+            }catch (Exception $e){
+                //try中有某些操作失败 回滚事务
+                $transaction->rollBack();
+                //恢复redis中扣减的库存
+                $reduce=$redis->hGetAll('reduce_'.$order_id);//等同于$reduce_$order_id['$goods_id'=>$amount];$arr['1'=>2,'2'=>3]
+                foreach($reduce as $id=>$num){
+                    //$id 哪个商品 $num 被扣减多少
+                    $redis->incrBy('stock_'.$id,$num);
+                }
+            }
 
         }
 

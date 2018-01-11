@@ -9,7 +9,7 @@ class RbacFilter extends ActionFilter{
     //在操作执行之前
     public function beforeAction($action)
     {
-        if(!\Yii::$app->user->can($action->uniqueId)){
+        if(!\Yii::$app->user->can($action->uniqueId)){//如果用户没有权限
             //如果没有登录，引导用户登录
             if(\Yii::$app->user->isGuest){
                 //跳转至登录页面

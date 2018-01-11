@@ -31,14 +31,14 @@ class UsersController extends  Controller{
     /**
      * 过滤器配置权限
      */
-   /* public function behaviors()
+   public function behaviors()
     {
         return [
             'rbac'=>[
                 'class'=>RbacFilter::className(),
             ]
         ];
-    }*/
+    }
     /**
      * 完成登录功能
      */

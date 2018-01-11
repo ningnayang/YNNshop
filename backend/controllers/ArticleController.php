@@ -61,12 +61,12 @@ class ArticleController extends Controller{
                 //加载数据
                 $model->load($request->post());
                 if($model->validate()){
-                    //将文章内容保存至article_detail表
+                    //将文章详情保存至article_detail表
                     $article_detail=new Article_detail();
                     $model->create_time=time();
                     $article_detail->content=$model->content;
                     $article_detail->save();//保存
-                    $model->save();//保存数据
+                    $model->save();//保存文章基本信息数据至article表
                     //发送提醒消息
                     \Yii::$app->session->setFlash('success','添加成功');
                     //跳转页面

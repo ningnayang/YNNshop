@@ -74,31 +74,11 @@ class SiteController extends Controller
      * @return mixed
      */
     public function actionIndex()
-    {   //使用redis来优化
-      /* $redis=new \Redis();
-       $redis->connect('127.0.0.1');
-       $categorys=$redis->get('categorys');
-        if(!$categorys){
-            //获取所有分类数据
-            $categorys=GoodsCategory::find()->where(['parent_id'=>0])->all();
-            foreach($categorys as $category){
-                //找到根节点下的一级子节点
-                $children=GoodsCategory::find()->where(['parent_id'=>$category->id])->all();
-                foreach($children as $child){
-                    $category->children[]=$child;//装一级子节点
-                    $kids=GoodsCategory::find()->where(['parent_id'=>$child->id])->all();
-                    foreach($kids as $kid){
-                        $child->children[]=$kid;//装二级子节点
-                    }
-                }
-            }
-            //将分类数据存入redis
-            $redis->set('categorys',serialize($categorys));
-        }else{
-            $categorys=unserialize($categorys);
-       }*/
-       $categorys=SiteController::getCategorys();
-        return $this->render('index',['categorys'=>$categorys]);
+    {
+        $categorys=SiteController::getCategorys();
+        $contents=$this->render('index',['categorys'=>$categorys]);
+        //将首页内容保存到静态化页面
+        file_put_contents('index.html',$contents);
     }
     /**
      * 获取商品分类的静态方法
