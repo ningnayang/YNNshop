@@ -76,9 +76,9 @@ class SiteController extends Controller
     public function actionIndex()
     {
         $categorys=SiteController::getCategorys();
-        $contents=$this->render('index',['categorys'=>$categorys]);
+         return $this->render('index',['categorys'=>$categorys]);
         //将首页内容保存到静态化页面
-        file_put_contents('index.html',$contents);
+
     }
     /**
      * 获取商品分类的静态方法
